@@ -126,7 +126,7 @@ package
 			this.graphics.clear();
 			for(var i:int = 0 ; i < mazeNodes.length ; i++){
 				var cNode:MazeNode = mazeNodes[i];
-				drawNode(cNode)
+				drawNode(cNode )
 			}
 		}
 		
