@@ -15,6 +15,8 @@ package
 		public var parentNodes:Array = []
 			
 		public var isDead:Boolean = false 
+			
+		public var room:MazeRect = null;
 		
 		public function MazeNode(_pos:Point)
 		{

@@ -3,6 +3,8 @@ package
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
 	import flash.display.StageScaleMode;
+	import flash.events.Event;
+	import flash.events.MouseEvent;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 
@@ -19,6 +21,10 @@ package
 		private var currentPoint:Point;
 		
 		private var connectNodes:Array;
+		
+		private var childIndex:int = 0;
+		
+		private var searchQueue:Array;
 		public function Maze()
 		{
 			super();
@@ -29,6 +35,7 @@ package
 			viewRect = new Rectangle(0,0,20,50);
 			allRects = new Array();
 			connectNodes = new Array();
+			searchQueue = new Array();
 			
 			var w:int =  2;
 			var h:int =  2;
@@ -53,6 +60,17 @@ package
 			findDoor();
 			findDieWay();
 			drawTree();
+			
+			searchQueue = [n]
+			levelSearch();
+			
+			var i = n.childNodes.indexOf(new Point(0,0));
+			for(var i:int = 0 ; i < n.childNodes.length ; i++){
+				trace(n.childNodes[i].pos)
+			}
+			
+			this.addEventListener(Event.ENTER_FRAME , onEnter);
+//			this.stage.addEventListener(MouseEvent.CLICK , onEnter);
 		}
 		
 		private function getFirstPoint():void{
@@ -81,6 +99,10 @@ package
 			
 		}
 		
+		/**
+		 *从生成的房间里开一个门 与地图联通 
+		 * 
+		 */		
 		private function findDoor():void{
 			for(var i:int = 0 ; i < allRects.length ; i++){
 				var rect:Rectangle = allRects[i].mRect;
@@ -88,7 +110,8 @@ package
 					for(var startX:int = rect.x ; startX <= rect.x + rect.width ; startX ++){
 						for(var startY:int = rect.y ; startY <= rect.y + rect.height ; startY ++){
 							if(((startX > rect.x) && (startX < (startX + rect.width)))
-								&& ((startY > rect.y) && (startY < (startY + rect.height)))){
+								&& ((startY > rect.y) && (startY < (startY + rect.height)))
+								&& startX!=0 && startX!=19 && startY!=0 && startY!=49){
 								
 							}else{
 								bRect.push(new Point(startX , startY));
@@ -99,9 +122,11 @@ package
 					}
 					
 					
-				for(var j:int = 0 ; j < 1 ; j ++){
-					var p:Point = bRect[j];
+				var index:int = int(bRect.length * Math.random());
+//				for(var j:int = 0 ; j < 1 ; j ++){
+					var p:Point = bRect[index];
 					var node:MazeNode = getMazeNode(p);
+					node.room = allRects[i];
 					for(var k:int = 0 ; k < node.connects.length; k ++){
 						var startP:Point = node.pos.clone();
 						var endP:Point = startP.add(dirs[node.connects[k]]);
@@ -117,23 +142,97 @@ package
 						break
 						
 					}
-				}
+//				}
 				
 			}
+		}
+		
+		private function onEnter(e):void{
+			if(searchQueue.length !=0){
+				var cNode:MazeNode = searchQueue.shift();
+				trace("cNode",cNode.pos)
+				searchRoom(cNode)
+			}
+			
+		}
+		
+		
+		private function levelSearch():void{
+//			while(searchQueue.length !=0){
+//				var cNode:MazeNode = searchQueue.shift();
+//				
+//				searchRoom(cNode)
+//			}
+		}
+		
+		private function searchRoom(cNode:MazeNode):void{
+			trace("root" , cNode.pos ,cNode.childNodes.length);
+			for(var i:int = 0 ; i < cNode.childNodes.length ; i++){
+				var childNode:MazeNode = cNode.childNodes[i]
+				if(childNode.pos == cNode.pos)return
+//				trace(childNode.pos)
+				this.graphics.lineStyle(3,0xff0000);
+				this.graphics.moveTo(cNode.pos.x * 10 +2 , cNode.pos.y * 10);
+				this.graphics.lineTo(childNode.pos.x * 10 +2, childNode.pos.y * 10);
+				
+				 if(childNode.room){
+					 childNode.room.setText(childIndex);
+					 childIndex ++;
+				 }else{
+					
+					 if(childNode.pos != cNode.pos){
+						 trace("childNode",childNode.pos)
+						 searchQueue.push(childNode)
+					 }
+					
+					
+				 }
+				
+				
+				
+//				if(!childNode.room){
+//					
+//					
+//					var gchildNode:MazeNode = childNode.childNodes[0];
+//					
+//					this.graphics.lineStyle(3,0xff0000);
+//					this.graphics.moveTo(childNode.pos.x * 10 +2 , childNode.pos.y * 10);
+//					this.graphics.lineTo(gchildNode.pos.x * 10 +2, gchildNode.pos.y * 10);
+////					trace("gchildNode",gchildNode.pos)
+//					searchQueue.push(gchildNode)
+//				}else if(childNode.room){
+//					childNode.room.setText(childIndex);
+//					childIndex ++;
+//					return;
+//				}
+				
+//				else if(childNode.childNodes.length > 1){
+//
+////					trace("!!!!",childNode.pos)
+//					searchQueue.push(childNode)
+//				}	
+				
+				
+				
+			}
+			
+			
+			
+			
 		}
 		
 		private function drawTree():void{
 			this.graphics.clear();
 			for(var i:int = 0 ; i < mazeNodes.length ; i++){
 				var cNode:MazeNode = mazeNodes[i];
-				drawNode(cNode )
+				drawNode(cNode)
 			}
 		}
 		
 		private function drawNode(cNode:MazeNode):void{
 			if(cNode.parentNodes.length != 0){
 				var pNode:MazeNode = cNode.parentNodes[0];
-				this.graphics.lineStyle(3,0x000000);
+				this.graphics.lineStyle(3,0x000000,0.1);
 				this.graphics.moveTo(cNode.pos.x * 10 +2 , cNode.pos.y * 10);
 				this.graphics.lineTo(pNode.pos.x * 10 +2, pNode.pos.y * 10);
 			}
@@ -242,10 +341,14 @@ package
 				var nextNode:MazeNode = getMazeNode(nextPoint);
 			}
 			
+//			
+			
 			if(nextNode !=null){
 				if(nextNode.state == 1){
-					curNode.childNodes.push(nextNode);
-					nextNode.parentNodes.push(curNode);
+					if(curNode != nextNode){
+						curNode.childNodes.push(nextNode);
+						nextNode.parentNodes.push(curNode);
+					}
 					
 					nextNode.state = 0;
 					connectNodes.push(nextNode);
