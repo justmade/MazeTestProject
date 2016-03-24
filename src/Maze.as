@@ -69,6 +69,7 @@ package
 				trace(n.childNodes[i].pos)
 			}
 			
+//			searchRoomByOrder(n)
 			this.addEventListener(Event.ENTER_FRAME , onEnter);
 //			this.stage.addEventListener(MouseEvent.CLICK , onEnter);
 		}
@@ -151,7 +152,7 @@ package
 			if(searchQueue.length !=0){
 				var cNode:MazeNode = searchQueue.shift();
 				trace("cNode",cNode.pos)
-				searchRoom(cNode)
+				searchRoomByLevel(cNode)
 			}
 			
 		}
@@ -165,11 +166,43 @@ package
 //			}
 		}
 		
-		private function searchRoom(cNode:MazeNode):void{
+		private function sortByPos(a:MazeNode , b:MazeNode):int{
+			var posa:Point = a.pos;
+			var posb:Point = b.pos;
+			if(posa.y > posb.y){
+				return 1;
+			}else if(posa.y < posb.y){
+				return -1;
+			}else{
+				return 0
+			}
+			
+			
+		}
+		
+		private function searchRoomByOrder(cNode:MazeNode):void{
+			cNode.childNodes = cNode.childNodes.sort(sortByPos)
+			for(var i:int = 0 ; i < cNode.childNodes.length ; i++){
+				
+				var childNode:MazeNode = cNode.childNodes[i]
+					
+				this.graphics.lineStyle(3,0xff0000);
+				this.graphics.moveTo(cNode.pos.x * 10 +2 , cNode.pos.y * 10);
+				this.graphics.lineTo(childNode.pos.x * 10 +2, childNode.pos.y * 10);
+				if(childNode.room){
+					childNode.room.setText(childIndex);
+					childIndex ++;
+				}else{
+					searchRoomByOrder(childNode);
+				}
+			}
+		}
+		
+		private function searchRoomByLevel(cNode:MazeNode):void{
 			trace("root" , cNode.pos ,cNode.childNodes.length);
+			cNode.childNodes = cNode.childNodes.sort(sortByPos)
 			for(var i:int = 0 ; i < cNode.childNodes.length ; i++){
 				var childNode:MazeNode = cNode.childNodes[i]
-				if(childNode.pos == cNode.pos)return
 //				trace(childNode.pos)
 				this.graphics.lineStyle(3,0xff0000);
 				this.graphics.moveTo(cNode.pos.x * 10 +2 , cNode.pos.y * 10);
