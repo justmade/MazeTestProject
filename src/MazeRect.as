@@ -10,6 +10,8 @@ package
 		public var mRect:Rectangle;
 		
 		private var tf:TextField ;
+		
+		public var doors:Array = []
 		public function MazeRect(rect:Rectangle,f:Boolean = false)
 		{
 			super();

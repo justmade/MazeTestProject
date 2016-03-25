@@ -60,7 +60,7 @@ package
 //				n.isDead = true;
 //				trace(n.pos)
 //			connectNodes = [n]
-			generateMaze();
+//			generateMaze();
 //			findDoor();
 //			findDieWay();
 			drawTree();
@@ -167,17 +167,28 @@ package
 				var startRect:MazeRect = allRects[i];
 				var endRect:MazeRect = allRects[i+1];
 				
-				var p:Point = getLocation(startRect , endRect);
+				var points:Array = getLocation(startRect , endRect)
+					
+				var p:Point = points[0];
+//				for(var k:int = 0 ; k < startRect.doors.length ; k++){
+//					if(p.equals(startRect.doors[k])){
+//						p = new Point(0,1)
+//						trace("11111")
+//						break
+//					}
+//				}
 				
-				grid.setStartNode(startRect.mRect.x + p.x ,startRect.mRect.y + p.y);
-				grid.setEndNode(endRect.mRect.x -  p.x,endRect.mRect.y - p.y);
+				startRect.doors.push(p);
+				endRect.doors.push(new Point(-p.x , -p.y))
+				
+//				grid.setStartNode(startRect.mRect.x + p.x ,startRect.mRect.y + p.y);
+//				grid.setEndNode(endRect.mRect.x - p.x,endRect.mRect.y - p.y);
 				astar.setGrid(grid)
 				var parr:Array = astar.getPath() ; 
 				parr.unshift(new Node(startRect.mRect.x , startRect.mRect.y))
 				parr.push(new Node(endRect.mRect.x , endRect.mRect.y))
 				for(var j:int = 0 ; j <parr.length; j++){
 					parr[j].isPath = true ;
-					
 					if( j < parr.length -1){
 						var parentNode:MazeNode = getMazeNode(new Point(parr[j]._x ,parr[j]._y))
 						var childNode:MazeNode = getMazeNode(new Point(parr[j+1]._x ,parr[j+1]._y))
@@ -200,23 +211,38 @@ package
 			}
 		}
 		
-		private function getLocation(startRect:MazeRect , endRect:MazeRect):Point{
+		private function getLocation(startRect:MazeRect , endRect:MazeRect):Array{
 			var dx:int = endRect.mRect.x - startRect.mRect.x;
 			var dy:int = endRect.mRect.y - startRect.mRect.y;
 			
+			var arr:Array = new Array();
 			if(Math.abs(dx) < Math.abs(dy)){
+				
 				if(dy > 0){
-					return new Point(0,1)
+					arr.push(new Point(0,1))
 				}else{
-					return new Point(0,-1)
+					arr.push(new Point(0,-1))
+				}
+				
+				if(dx > 0){
+					arr.push(new Point(1,0))
+				}else{
+					arr.push(new Point(-1,0))
 				}
 			}else{
 				if(dx > 0){
-					return new Point(1,0)
+					arr.push(new Point(1,0))
 				}else{
-					return new Point(-1,0)
+					arr.push(new Point(-1,0))
+				}
+				
+				if(dy > 0){
+					arr.push(new Point(0,1))
+				}else{
+					arr.push(new Point(0,-1))
 				}
 			}
+			return arr
 			
 		}
 		
