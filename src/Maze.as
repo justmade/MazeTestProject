@@ -1,5 +1,9 @@
 package
 {
+	import com.astar.AStar;
+	import com.astar.Grid;
+	import com.astar.Node;
+	
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
 	import flash.display.StageScaleMode;
@@ -49,30 +53,216 @@ package
 			changeNodeState(newR)	
 			
 			generateBlocks();
-			
 			getFirstPoint()
-			
-			var n:MazeNode = getMazeNode(currentPoint)
-				n.isDead = true;
-				trace(n.pos)
-			connectNodes = [n]
+			initAstar()
+//			
+//			var n:MazeNode = getMazeNode(currentPoint)
+//				n.isDead = true;
+//				trace(n.pos)
+//			connectNodes = [n]
 			generateMaze();
-			findDoor();
-			findDieWay();
+//			findDoor();
+//			findDieWay();
 			drawTree();
-			
-			searchQueue = [n]
-			levelSearch();
-			
-			var i = n.childNodes.indexOf(new Point(0,0));
-			for(var i:int = 0 ; i < n.childNodes.length ; i++){
-				trace(n.childNodes[i].pos)
-			}
+//			
+//			searchQueue = [n]
+//			levelSearch();
+//			
+//			var i = n.childNodes.indexOf(new Point(0,0));
+//			for(var i:int = 0 ; i < n.childNodes.length ; i++){
+//				trace(n.childNodes[i].pos)
+//			}
 			
 //			searchRoomByOrder(n)
-			this.addEventListener(Event.ENTER_FRAME , onEnter);
+//			this.addEventListener(Event.ENTER_FRAME , onEnter);
 //			this.stage.addEventListener(MouseEvent.CLICK , onEnter);
 		}
+		private var grid:Grid ;
+		private var astar:AStar;
+		private var gridSp:Sprite
+		
+		
+		private function initAstar():void{
+			grid = new Grid();
+			grid.creatGrid(50,20)
+				
+			for(var i:int = 0 ; i < allRects.length ; i++){
+//				if(allRects[i].state == 0){
+					var arr:Array = grid.nodeArrayList ; 
+					var x:int = allRects[i].mRect.x;
+					var y:int = allRects[i].mRect.y;
+//					trace(x,y)
+					var node:Node = arr[x][y];
+					if(node.walkable){
+						grid.setWalkAble(x,y,false);
+					}
+					
+//				}
+			}
+//			allRects.sort(sortRectByPosX);
+//			allRects.sort(sortRectByPos);
+			sortAllRect();
+			
+			for(var i:int = 0 ; i < allRects.length ; i ++){
+				allRects[i].setText(i)
+			}
+			astar = new AStar()
+			
+				
+			gridSp = new Sprite();
+			this.addChild(gridSp)
+			gridSp.x = 200
+			drawGird();
+			findRectPath()
+		}
+		
+		private function sortAllRect():void{
+			var all:Array = new Array()
+			for(var i:int = 0 ; i < 50 ; i ++){
+				var temp:Array = new Array()
+				for(var j:int = 0 ; j < allRects.length ; j++){
+					if(allRects[j].mRect.y == i){
+						temp.push(allRects[j]);
+					}
+				}
+				
+				if(temp.length > 0){
+					temp.sort(sortRectByPosX);
+					all = all.concat(temp)
+				}
+			}
+			allRects = all;
+		}
+		
+		private function drawGird():void{
+			gridSp.graphics.clear()
+			var arr:Array = grid.nodeArrayList ; 
+			for(var i:int = 0 ; i < grid.gridLineNum ; i++){
+				for(var j:int = 0 ; j < grid.gridRowNum ; j++){
+					var node:Node = arr[j][i];
+					gridSp.graphics.lineStyle(0);
+					gridSp.graphics.beginFill(getNodeColor(node));
+					gridSp.graphics.drawRect(j*10 , i *10 , 10 , 10);
+				}
+			}
+		}
+		
+		private function getNodeColor(_node:Node):uint
+		{
+			if(_node == grid.startNode){return 0xff0000};
+			if(_node == grid.endNode){return 0xff0000} ;
+			if(!_node.walkable){return 0x000000}
+			if(_node.isPath){return 0x00ff00};
+			if(_node.isFind){return 0x333333};
+			return 0x0000ff ;
+			
+		}
+		
+		/**
+		 *将所有矩形连接起来 
+		 * 
+		 */
+		private function findRectPath():void{
+			for(var i:int = 0 ; i <allRects.length-1 ; i ++){
+				var startRect:MazeRect = allRects[i];
+				var endRect:MazeRect = allRects[i+1];
+				
+				var p:Point = getLocation(startRect , endRect);
+				
+				grid.setStartNode(startRect.mRect.x + p.x ,startRect.mRect.y + p.y);
+				grid.setEndNode(endRect.mRect.x -  p.x,endRect.mRect.y - p.y);
+				astar.setGrid(grid)
+				var parr:Array = astar.getPath() ; 
+				parr.unshift(new Node(startRect.mRect.x , startRect.mRect.y))
+				parr.push(new Node(endRect.mRect.x , endRect.mRect.y))
+				for(var j:int = 0 ; j <parr.length; j++){
+					parr[j].isPath = true ;
+					
+					if( j < parr.length -1){
+						var parentNode:MazeNode = getMazeNode(new Point(parr[j]._x ,parr[j]._y))
+						var childNode:MazeNode = getMazeNode(new Point(parr[j+1]._x ,parr[j+1]._y))
+						parentNode.childNodes.push(childNode);
+						childNode.parentNodes.push(parentNode)
+							
+						parentNode.isMain = true	
+						parentNode.state = 0;
+						connectNodes.push(parentNode);	
+						parentNode.isMain = true
+						childNode.state = 0;
+						connectNodes.push(childNode);		
+						
+					}
+					
+				}
+				
+				
+				drawGird();
+			}
+		}
+		
+		private function getLocation(startRect:MazeRect , endRect:MazeRect):Point{
+			var dx:int = endRect.mRect.x - startRect.mRect.x;
+			var dy:int = endRect.mRect.y - startRect.mRect.y;
+			
+			if(Math.abs(dx) < Math.abs(dy)){
+				if(dy > 0){
+					return new Point(0,1)
+				}else{
+					return new Point(0,-1)
+				}
+			}else{
+				if(dx > 0){
+					return new Point(1,0)
+				}else{
+					return new Point(-1,0)
+				}
+			}
+			
+		}
+		
+		private function setRectPath():void{
+			
+		}
+		
+		/**
+		 * 按照矩形的y轴排序 
+		 * @param a
+		 * @param b
+		 * @return 
+		 * 
+		 */
+		private function sortRectByPos(a:MazeRect , b:MazeRect):int{
+			var posa:int = a.mRect.y;
+			var posb:int = b.mRect.y;
+			if(posa > posb){
+				return 1;
+			}else if(posa < posb){
+				return -1;
+			}else{
+				return 0
+			}
+			
+			
+		}
+		
+		private function sortRectByPosX(a:MazeRect , b:MazeRect):int{
+			var posa:int = a.mRect.x;
+			var posb:int = b.mRect.x;
+			if(posa > posb){
+				return 1;
+			}else if(posa < posb){
+				return -1;
+			}else{
+				return 0
+			}
+			
+			
+		}
+		
+		
+		
+		
+		
 		
 		private function getFirstPoint():void{
 			for(var i:int = 0 ; i < mazeNodes.length ; i++){
@@ -221,32 +411,6 @@ package
 					
 				 }
 				
-				
-				
-//				if(!childNode.room){
-//					
-//					
-//					var gchildNode:MazeNode = childNode.childNodes[0];
-//					
-//					this.graphics.lineStyle(3,0xff0000);
-//					this.graphics.moveTo(childNode.pos.x * 10 +2 , childNode.pos.y * 10);
-//					this.graphics.lineTo(gchildNode.pos.x * 10 +2, gchildNode.pos.y * 10);
-////					trace("gchildNode",gchildNode.pos)
-//					searchQueue.push(gchildNode)
-//				}else if(childNode.room){
-//					childNode.room.setText(childIndex);
-//					childIndex ++;
-//					return;
-//				}
-				
-//				else if(childNode.childNodes.length > 1){
-//
-////					trace("!!!!",childNode.pos)
-//					searchQueue.push(childNode)
-//				}	
-				
-				
-				
 			}
 			
 			
@@ -265,7 +429,13 @@ package
 		private function drawNode(cNode:MazeNode):void{
 			if(cNode.parentNodes.length != 0){
 				var pNode:MazeNode = cNode.parentNodes[0];
-				this.graphics.lineStyle(3,0x000000,0.1);
+				if(cNode.isMain == false){
+					this.graphics.lineStyle(3,0x000000,0.1);
+				}else{
+					this.graphics.lineStyle(3,0xff0000,0.8);
+
+				}
+				
 				this.graphics.moveTo(cNode.pos.x * 10 +2 , cNode.pos.y * 10);
 				this.graphics.lineTo(pNode.pos.x * 10 +2, pNode.pos.y * 10);
 			}
@@ -347,6 +517,11 @@ package
 			}
 		}
 		
+		/**
+		 * 改变节点状态 
+		 * @param rect 已经生产的方块
+		 * 
+		 */
 		private function changeNodeState(rect:Rectangle):void{
 			for(var i:int = 0 ; i <= rect.height ; i++){
 				var startIndex:int = (rect.y + i) * 20  + rect.x ;

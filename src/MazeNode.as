@@ -18,6 +18,8 @@ package
 			
 		public var room:MazeRect = null;
 		
+		public var isMain:Boolean = false
+		
 		public function MazeNode(_pos:Point)
 		{
 			pos = _pos
