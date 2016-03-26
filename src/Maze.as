@@ -4,6 +4,7 @@ package
 	import com.astar.Grid;
 	import com.astar.Node;
 	
+	import flash.display.Bitmap;
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
 	import flash.display.StageScaleMode;
@@ -15,6 +16,10 @@ package
 	[SWF(height="700",width="700")]
 	public class Maze extends Sprite
 	{
+		
+		[Embed(source='wall.png')]
+		private var wallImg:Class;
+		
 		
 		private var viewRect:Rectangle
 		
@@ -35,15 +40,18 @@ package
 			
 			stage.align = StageAlign.TOP;
 			stage.scaleMode = StageScaleMode.NO_SCALE
+				
+//			this.addChild(new wallImg())
+				
 			gridMap()
-			viewRect = new Rectangle(0,0,20,50);
+			viewRect = new Rectangle(5,0,10,50);
 			allRects = new Array();
 			connectNodes = new Array();
 			searchQueue = new Array();
 			
-			var w:int =  2;
-			var h:int =  2;
-			var posx:int = Math.random() * (viewRect.width - w) ;
+			var w:int =  1;
+			var h:int =  1;
+			var posx:int = viewRect.x + Math.random() * (viewRect.width - w) ;
 			var posy:int = Math.random() * (viewRect.height - h);
 			var newR:Rectangle = new Rectangle(posx,posy,w,h)
 			var mazeRect:MazeRect = new MazeRect(newR,true);
@@ -60,7 +68,7 @@ package
 //				n.isDead = true;
 //				trace(n.pos)
 //			connectNodes = [n]
-//			generateMaze();
+			generateMaze();
 //			findDoor();
 //			findDieWay();
 			drawTree();
@@ -170,19 +178,18 @@ package
 				var points:Array = getLocation(startRect , endRect)
 					
 				var p:Point = points[0];
-//				for(var k:int = 0 ; k < startRect.doors.length ; k++){
-//					if(p.equals(startRect.doors[k])){
-//						p = new Point(0,1)
-//						trace("11111")
-//						break
-//					}
-//				}
+				for(var k:int = 0 ; k < startRect.doors.length ; k++){
+					if(p.equals(startRect.doors[k])){
+						p = points[1]
+						break
+					}
+				}
 				
 				startRect.doors.push(p);
 				endRect.doors.push(new Point(-p.x , -p.y))
 				
-//				grid.setStartNode(startRect.mRect.x + p.x ,startRect.mRect.y + p.y);
-//				grid.setEndNode(endRect.mRect.x - p.x,endRect.mRect.y - p.y);
+				grid.setStartNode(startRect.mRect.x + p.x ,startRect.mRect.y + p.y);
+				grid.setEndNode(endRect.mRect.x - p.x,endRect.mRect.y - p.y);
 				astar.setGrid(grid)
 				var parr:Array = astar.getPath() ; 
 				parr.unshift(new Node(startRect.mRect.x , startRect.mRect.y))
@@ -456,7 +463,7 @@ package
 			if(cNode.parentNodes.length != 0){
 				var pNode:MazeNode = cNode.parentNodes[0];
 				if(cNode.isMain == false){
-					this.graphics.lineStyle(3,0x000000,0.1);
+					this.graphics.lineStyle(3,0x000000,0.3);
 				}else{
 					this.graphics.lineStyle(3,0xff0000,0.8);
 
@@ -503,10 +510,10 @@ package
 		
 		private function generateBlocks():void{
 			var index:int = 0
-			while(index < 300){
+			while(index < 100){
 				var w:int =  1;
 				var h:int =  1;
-				var posx:int = Math.random() * (viewRect.width - w) ;
+				var posx:int = viewRect.x +  Math.random() * (viewRect.width - w) ;
 				var posy:int = Math.random() * (viewRect.height - h);
 				var newR:Rectangle = new Rectangle(posx,posy,w,h)
 				var hasContain:Boolean = false
