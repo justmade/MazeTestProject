@@ -1,0 +1,22 @@
+﻿
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+# On branch doubleLine
+# Your branch is up-to-date with 'origin/doubleLine'.
+#
+# Changes to be committed:
+#	modified:   .actionScriptProperties
+#	modified:   .project
+#	modified:   bin-debug/Fireworks.swf
+#	modified:   bin-debug/ListTest.swf
+#	modified:   bin-debug/Main.swf
+#	modified:   bin-debug/Maze.swf
+#	modified:   bin-debug/Prim.swf
+#	modified:   bin-debug/TestProject.swf
+#	modified:   src/Maze.as
+#
+# Untracked files:
+#	bin-debug/wall2.png
+#	src/wall2.png
+#
+
