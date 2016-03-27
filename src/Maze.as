@@ -18,11 +18,17 @@ package
 	public class Maze extends Sprite
 	{
 		
-		[Embed(source='wall.png')]
+		[Embed(source='wall2.png')]
 		private var wallImg:Class;
 		
-		[Embed(source='wall2.png')]
+		[Embed(source='wall.png')]
 		private var wallQImg:Class;
+		
+		[Embed(source="road.png")]
+		private var roadImg:Class;
+		
+		[Embed(source = "chapter.png")]
+		private var chapterImg:Class
 		
 		
 		private var viewRect:Rectangle
@@ -183,15 +189,15 @@ package
 				var points:Array = getLocation(startRect , endRect)
 					
 				var p:Point = points[0];
-				for(var k:int = 0 ; k < startRect.doors.length ; k++){
-					if(p.equals(startRect.doors[k])){
-						p = points[1]
-						break
-					}
-				}
-				
-				startRect.doors.push(p);
-				endRect.doors.push(new Point(-p.x , -p.y))
+//				for(var k:int = 0 ; k < startRect.doors.length ; k++){
+//					if(p.equals(startRect.doors[k])){
+//						p = points[1]
+//						break
+//					}
+//				}
+//				
+//				startRect.doors.push(p);
+//				endRect.doors.push(new Point(-p.x , -p.y))
 				
 				grid.setStartNode(startRect.mRect.x + p.x ,startRect.mRect.y + p.y);
 				grid.setEndNode(endRect.mRect.x - p.x,endRect.mRect.y - p.y);
@@ -683,13 +689,13 @@ package
 		
 		
 		private function drawMap():void{
-			this.graphics.clear()
-			gridSp.graphics.clear()
+//			this.graphics.clear()
+//			gridSp.graphics.clear()
 			for(var i:int = 0 ; i <20 * 50 *2*2 ; i ++){
 				var w:Bitmap = new wallQImg();
 				this.addChild(w);
 				w.scaleX = w.scaleY = 0.5;
-				w.x = i%40 * w.width;
+				w.x = i%40 * w.width + 300 ;
 				w.y = int(i/40) * w.height;
 			}
 			
@@ -701,11 +707,16 @@ package
 					var pp:Point = cNode.parentNodes[0].pos
 					
 					var wallOne:Bitmap = new wallImg(); 
+					var wallTwo :Bitmap = new wallImg();
+					if(cNode.isMain){
+						wallOne = new roadImg();
+						wallTwo = new roadImg();
+						
+					}
 					wallOne.x = pp.x * wallOne.width;
 					wallOne.y = pp.y * wallOne.height;
 					wallOne.scaleX = wallOne.scaleY = 0.5
 					
-					var wallTwo :Bitmap = new wallImg();
 					wallTwo.x = (cp.x + pp.x)/2 * wallTwo.width
 					wallTwo.y = (cp.y + pp.y)/2 * wallTwo.height
 					wallTwo.scaleX = wallTwo.scaleY = 0.5
@@ -719,7 +730,18 @@ package
 				
 				
 			}
+			
 			this.addChild(canvas)
+				
+			for(var i:int = 0 ; i < allRects.length ; i++){
+				var r:MazeRect = allRects[i];
+				var chatper:Bitmap = new chapterImg()
+				this.addChild(chatper)
+				chatper.x = r.mRect.x * chatper.width + 300;
+				chatper.y = r.mRect.y * chatper.height
+				chatper.scaleX = chatper.scaleY = 0.5;
+			}
+			canvas.x = 300
 		}
 		
 	}
