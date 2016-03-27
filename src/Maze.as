@@ -10,6 +10,7 @@ package
 	import flash.display.StageScaleMode;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
+	import flash.geom.ColorTransform;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 
@@ -19,6 +20,9 @@ package
 		
 		[Embed(source='wall.png')]
 		private var wallImg:Class;
+		
+		[Embed(source='wall2.png')]
+		private var wallQImg:Class;
 		
 		
 		private var viewRect:Rectangle
@@ -72,6 +76,7 @@ package
 //			findDoor();
 //			findDieWay();
 			drawTree();
+			drawMap()
 //			
 //			searchQueue = [n]
 //			levelSearch();
@@ -674,6 +679,47 @@ package
 					return new Point(-1,0);
 			}
 			return new Point(1,1);
+		}
+		
+		
+		private function drawMap():void{
+			this.graphics.clear()
+			gridSp.graphics.clear()
+			for(var i:int = 0 ; i <20 * 50 *2*2 ; i ++){
+				var w:Bitmap = new wallQImg();
+				this.addChild(w);
+				w.scaleX = w.scaleY = 0.5;
+				w.x = i%40 * w.width;
+				w.y = int(i/40) * w.height;
+			}
+			
+			var canvas:Sprite = new Sprite();
+			for(var i:int = 0 ; i < mazeNodes.length ; i++){
+				var cNode:MazeNode = mazeNodes[i];
+				if(cNode.parentNodes.length != 0 ){
+					var cp:Point = cNode.pos;
+					var pp:Point = cNode.parentNodes[0].pos
+					
+					var wallOne:Bitmap = new wallImg(); 
+					wallOne.x = pp.x * wallOne.width;
+					wallOne.y = pp.y * wallOne.height;
+					wallOne.scaleX = wallOne.scaleY = 0.5
+					
+					var wallTwo :Bitmap = new wallImg();
+					wallTwo.x = (cp.x + pp.x)/2 * wallTwo.width
+					wallTwo.y = (cp.y + pp.y)/2 * wallTwo.height
+					wallTwo.scaleX = wallTwo.scaleY = 0.5
+					
+					trace("draw",(cp.x + pp.x))
+					
+					canvas.addChild(wallOne);
+					canvas.addChild(wallTwo)
+						
+				}
+				
+				
+			}
+			this.addChild(canvas)
 		}
 		
 	}
