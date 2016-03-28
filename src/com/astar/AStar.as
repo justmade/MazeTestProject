@@ -85,11 +85,22 @@ package com.astar
 					trace("没有路径")
 					return false ; 
 				}
-				waits.sortOn("f",Array.NUMERIC);
+//				waits.sortOn("f",Array.NUMERIC);
+				waits.sort(sortNode);
 				centerNode = waits.shift() as Node ;
 			}
 			buildPaths();
 			return true ;
+		}
+		
+		private function sortNode(aNode:Node , bNode:Node):int{
+			if(aNode.f < bNode.f){
+				return -1
+			}else if(aNode.f == bNode.f){
+				return 0
+			}else{
+				return 1
+			}
 		}
 		
 		private function buildPaths():void{

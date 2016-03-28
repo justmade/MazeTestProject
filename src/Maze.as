@@ -36,14 +36,14 @@ package
 			stage.align = StageAlign.TOP;
 			stage.scaleMode = StageScaleMode.NO_SCALE
 			gridMap()
-			viewRect = new Rectangle(0,0,20,50);
+			viewRect = new Rectangle(5,0,10,50);
 			allRects = new Array();
 			connectNodes = new Array();
 			searchQueue = new Array();
 			
-			var w:int =  2;
-			var h:int =  2;
-			var posx:int = Math.random() * (viewRect.width - w) ;
+			var w:int =  1;
+			var h:int =  1;
+			var posx:int = viewRect.x + Math.random() * (viewRect.width - w) ;
 			var posy:int = Math.random() * (viewRect.height - h);
 			var newR:Rectangle = new Rectangle(posx,posy,w,h)
 			var mazeRect:MazeRect = new MazeRect(newR,true);
@@ -60,7 +60,7 @@ package
 //				n.isDead = true;
 //				trace(n.pos)
 //			connectNodes = [n]
-//			generateMaze();
+			generateMaze();
 //			findDoor();
 //			findDieWay();
 			drawTree();
@@ -170,19 +170,18 @@ package
 				var points:Array = getLocation(startRect , endRect)
 					
 				var p:Point = points[0];
-//				for(var k:int = 0 ; k < startRect.doors.length ; k++){
-//					if(p.equals(startRect.doors[k])){
-//						p = new Point(0,1)
-//						trace("11111")
-//						break
-//					}
-//				}
+				for(var k:int = 0 ; k < startRect.doors.length ; k++){
+					if(p.equals(startRect.doors[k])){
+						p = points[1];
+						break
+					}
+				}
 				
 				startRect.doors.push(p);
 				endRect.doors.push(new Point(-p.x , -p.y))
 				
-//				grid.setStartNode(startRect.mRect.x + p.x ,startRect.mRect.y + p.y);
-//				grid.setEndNode(endRect.mRect.x - p.x,endRect.mRect.y - p.y);
+				grid.setStartNode(startRect.mRect.x + p.x ,startRect.mRect.y + p.y);
+				grid.setEndNode(endRect.mRect.x - p.x,endRect.mRect.y - p.y);
 				astar.setGrid(grid)
 				var parr:Array = astar.getPath() ; 
 				parr.unshift(new Node(startRect.mRect.x , startRect.mRect.y))
@@ -236,7 +235,7 @@ package
 					arr.push(new Point(-1,0))
 				}
 				
-				if(dy > 0){
+				if(dy >= 0){
 					arr.push(new Point(0,1))
 				}else{
 					arr.push(new Point(0,-1))
@@ -503,16 +502,16 @@ package
 		
 		private function generateBlocks():void{
 			var index:int = 0
-			while(index < 300){
+			while(index < 200){
 				var w:int =  1;
 				var h:int =  1;
-				var posx:int = Math.random() * (viewRect.width - w) ;
+				var posx:int = viewRect.x + Math.random() * (viewRect.width - w) ;
 				var posy:int = Math.random() * (viewRect.height - h);
 				var newR:Rectangle = new Rectangle(posx,posy,w,h)
 				var hasContain:Boolean = false
 				for(var i:int=0 ; i < allRects.length ; i++){
 					var r:Rectangle = allRects[i].mRect;
-					var cr:Rectangle = new Rectangle(r.x - 2,r.y-2,r.width +4, r.height+4)
+					var cr:Rectangle = new Rectangle(r.x - 3,r.y-3,r.width +6, r.height+6)
 					if(cr.intersects(newR)){
 						hasContain = true;
 					}
